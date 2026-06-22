@@ -124,9 +124,24 @@
   }
 
   /* ── getDoc: open (or reuse) a PDF document by index ── */
+  /* -- driveUrl: convert any Google Drive share link to a proxied URL -- */
+  function driveUrl(url) {
+    var id = null, m;
+    m = url.match(/\/file\/d\/([^\/\?&]+)/);
+    if (m) id = m[1];
+    if (!id) { m = url.match(/[?&]id=([^&]+)/); if (m) id = m[1]; }
+    if (!id) { m = url.match(/\/d\/([^\/\?&]+)/); if (m) id = m[1]; }
+    if (id) {
+      var direct = "https://drive.google.com/uc?export=download&id=" + id;
+      return "https://corsproxy.io/?" + encodeURIComponent(direct);
+    }
+    return url;
+  }
+
+  /* -- getDoc: open (or reuse) a PDF document by index -- */
   function getDoc(docIndex) {
     if (docCache[docIndex]) return docCache[docIndex];
-    docCache[docIndex] = pdfjsLib.getDocument(pdfUrls[docIndex]).promise;
+    docCache[docIndex] = pdfjsLib.getDocument(driveUrl(pdfUrls[docIndex])).promise;
     return docCache[docIndex];
   }
 
@@ -304,7 +319,7 @@
 
       pdfUrls.forEach(function (url, idx) {
         chain = chain.then(function () {
-          return pdfjsLib.getDocument(url).promise.then(function (doc) {
+          return pdfjsLib.getDocument(driveUrl(url)).promise.then(function (doc) {
             // Cache the already-opened document so getDoc() reuses it
             docCache[idx] = Promise.resolve(doc);
             segments.push({ docIndex: idx, numPages: doc.numPages });
