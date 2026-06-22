@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>पुस्तक पाठक | Shikshit Mitra</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="book.css">
+</head>
+<body>
+
+<div class="book-app">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <button class="icon-btn icon-btn--back" id="backBtn" type="button" aria-label="पछाडि जानुहोस्">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+    </button>
+
+    <div class="topbar-title" id="bookTitle">खरिदार द्वितीय पत्र</div>
+
+    <div class="topbar-page" id="pageIndicator">
+      <span id="pageCurrent">1</span><span class="topbar-page__sep">/</span><span id="pageTotal">24</span>
+    </div>
+  </header>
+
+  <!-- Reader stage -->
+  <main class="reader-stage">
+
+    <!-- Left nav arrow -->
+    <button class="nav-arrow nav-arrow--left" id="prevBtn" type="button" aria-label="अघिल्लो पाना">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+    </button>
+
+    <!-- Book flip container -->
+    <div class="book-outer" id="bookOuter">
+
+      <!-- PDF loading overlay -->
+      <div class="pdf-loader" id="pdfLoader">
+        <span class="pdf-spinner" aria-hidden="true"></span>
+        <p class="pdf-loader__text">पाना लोड हुँदैछ…</p>
+      </div>
+
+      <!-- PDF error overlay -->
+      <div class="pdf-error is-hidden" id="pdfError">
+        <svg class="pdf-error__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 8v5"/>
+          <path d="M12 16h.01"/>
+        </svg>
+        <p class="pdf-error__text" id="pdfErrorText">पाना लोड गर्न सकिएन</p>
+        <button class="pdf-retry-btn" id="pdfRetryBtn" type="button">फेरि प्रयास गर्नुहोस्</button>
+      </div>
+
+      <!--
+        The flip book lives here.
+        Structure (injected by JS):
+
+        .flip-book
+          .flip-spread                   ← the visible double-page spread
+            .flip-page.page-left         ← static left page (or single)
+              canvas
+            .flip-page.page-right        ← static right page
+              canvas
+
+          .flip-scene                    ← 3-D perspective layer
+            .flip-leaf                   ← the turning leaf (two sides)
+              .flip-front  canvas        ← front face
+              .flip-back   canvas        ← back face (mirror)
+
+          .flip-shadow-left              ← cast shadow on left page
+          .flip-shadow-right             ← cast shadow on right page
+      -->
+      <div class="flip-book" id="flipBook"></div>
+    </div>
+
+    <!-- Right nav arrow -->
+    <button class="nav-arrow nav-arrow--right" id="nextBtn" type="button" aria-label="अर्को पाना">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </button>
+
+  </main>
+
+  <!-- Floating toolbar -->
+  <footer class="toolbar">
+    <div class="toolbar-group">
+      <button class="icon-btn icon-btn--ghost" id="zoomOutBtn" type="button" aria-label="जुम घटाउनुहोस्">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6"/>
+        </svg>
+      </button>
+      <span class="toolbar-zoom" id="zoomLevel">100%</span>
+      <button class="icon-btn icon-btn--ghost" id="zoomInBtn" type="button" aria-label="जुम बढाउनुहोस्">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="toolbar-divider" aria-hidden="true"></div>
+
+    <button class="icon-btn icon-btn--ghost" id="fullscreenBtn" type="button" aria-label="पूर्ण स्क्रिन">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>
+        <path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+      </svg>
+    </button>
+  </footer>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="book.js"></script>
+</body>
+</html>
