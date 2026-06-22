@@ -133,7 +133,7 @@
     if (!id) { m = url.match(/\/d\/([^\/\?&]+)/); if (m) id = m[1]; }
     if (id) {
       var direct = "https://drive.google.com/uc?export=download&id=" + id;
-      return "https://corsproxy.io/?" + encodeURIComponent(direct);
+      return "https://api.allorigins.win/raw?url=" + encodeURIComponent(direct);
     }
     return url;
   }
