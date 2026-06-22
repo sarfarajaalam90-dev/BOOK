@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>पुस्तक | Shikshit Mitra</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0f1018;
+  --surface:#1a1b26;
+  --border:rgba(255,255,255,0.07);
+  --text:#e8e9f0;
+  --muted:#888;
+  --accent:#8c6ed6;
+  --page-bg:#fffef8;
+  --page-line:#e8e4d8;
+  --page-text:#1a1a2e;
+  --page-head:#3d1f7a;
+  --spine:#2d1f5e;
+}
+
+html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow:hidden}
+
+.app{display:flex;flex-direction:column;height:100vh;width:100vw}
+
+/* ── Topbar ── */
+.topbar{
+  display:flex;align-items:center;gap:12px;
+  padding:0 16px;height:52px;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  flex-shrink:0;z-index:10;
+}
+.topbar-title{flex:1;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Noto Serif Devanagari',serif}
+.topbar-page{font-size:13px;color:var(--muted);white-space:nowrap}
+.topbar-page__sep{margin:0 2px}
+
+/* ── Stage ── */
+.stage{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  background:radial-gradient(ellipse at center, #1e1f2e 0%, #0f1018 100%);
+}
+
+/* ── Nav arrows ── */
+.nav{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:40px;height:40px;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+  border-radius:50%;color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  z-index:5;transition:background .15s;flex-shrink:0;
+}
+.nav:hover{background:rgba(255,255,255,0.14)}
+.nav:disabled{opacity:.2;cursor:default;pointer-events:none}
+.nav svg{width:20px;height:20px}
+.nav--left{left:12px}
+.nav--right{right:12px}
+
+/* ── Book wrapper ── */
+.book-wrap{
+  perspective:2000px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+
+/* ── The book ── */
+.book{
+  position:relative;
+  display:flex;
+  transform-style:preserve-3d;
+  filter:drop-shadow(0 24px 48px rgba(0,0,0,0.6));
+}
+
+/* ── Page ── */
+.page{
+  width:var(--pw);height:var(--ph);
+  background:var(--page-bg);
+  position:relative;overflow:hidden;
+  flex-shrink:0;
+}
+
+/* Left page — slightly darker */
+.page--left{
+  border-radius:4px 0 0 4px;
+  background:linear-gradient(to right, #f5f3ec, #fffef8);
+  border-right:1px solid var(--page-line);
+}
+
+/* Right page */
+.page--right{
+  border-radius:0 4px 4px 0;
+  background:var(--page-bg);
+}
+
+/* Spine shadow on left page */
+.page--left::after{
+  content:'';position:absolute;top:0;right:0;width:32px;height:100%;
+  background:linear-gradient(to left, rgba(0,0,0,0.08), transparent);
+  pointer-events:none;
+}
+
+/* Spine shadow on right page */
+.page--right::before{
+  content:'';position:absolute;top:0;left:0;width:32px;height:100%;
+  background:linear-gradient(to right, rgba(0,0,0,0.06), transparent);
+  pointer-events:none;z-index:1;
+}
+
+/* Spine */
+.spine{
+  width:12px;height:var(--ph);
+  background:linear-gradient(to bottom, #4a2d8a, var(--spine), #2a1a50);
+  flex-shrink:0;
+  box-shadow:inset -2px 0 4px rgba(0,0,0,0.3), inset 2px 0 4px rgba(0,0,0,0.3);
+}
+
+/* Page content */
+.page-inner{
+  padding:32px 28px 24px;
+  height:100%;display:flex;flex-direction:column;
+  position:relative;z-index:2;
+}
+
+/* Ruled lines */
+.page-inner::before{
+  content:'';position:absolute;
+  top:72px;left:0;right:0;bottom:24px;
+  background-image:repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 27px,
+    var(--page-line) 27px,
+    var(--page-line) 28px
+  );
+  pointer-events:none;
+}
+
+/* Red margin line on left */
+.page--right .page-inner::after{
+  content:'';position:absolute;
+  top:0;left:52px;width:1px;height:100%;
+  background:rgba(220,80,80,0.2);
+  pointer-events:none;
+}
+
+.page-head{
+  font-family:'Noto Serif Devanagari',serif;
+  font-size:13px;font-weight:600;
+  color:var(--page-head);
+  text-transform:uppercase;letter-spacing:.06em;
+  margin-bottom:16px;padding-bottom:8px;
+  border-bottom:1.5px solid var(--accent);
+  opacity:.7;
+  position:relative;z-index:3;
+}
+
+.page-title{
+  font-family:'Noto Serif Devanagari',serif;
+  font-size:18px;font-weight:700;
+  color:var(--page-head);
+  margin-bottom:16px;line-height:1.4;
+  position:relative;z-index:3;
+}
+
+.page-body{
+  font-family:'Noto Serif Devanagari',serif;
+  font-size:14px;line-height:28px;
+  color:var(--page-text);
+  flex:1;overflow:hidden;
+  position:relative;z-index:3;
+  white-space:pre-wrap;word-break:break-word;
+}
+
+.page-num{
+  font-size:11px;color:var(--muted);
+  text-align:center;margin-top:8px;
+  position:relative;z-index:3;letter-spacing:.05em;
+}
+
+/* ── Flip animation ── */
+.flip-container{
+  position:absolute;top:0;
+  width:var(--pw);height:var(--ph);
+  transform-style:preserve-3d;
+  pointer-events:none;
+  z-index:10;
+}
+.flip-container.is-right{left:50%;transform-origin:left center}
+.flip-container.is-left{right:50%;transform-origin:right center}
+
+.flip-face{
+  position:absolute;inset:0;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  overflow:hidden;
+}
+.flip-face--back{transform:rotateY(180deg)}
+
+/* ── Overlays ── */
+.overlay{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;background:var(--bg);z-index:30;border-radius:6px;
+}
+.overlay.is-hidden{display:none}
+
+.spinner{
+  width:34px;height:34px;
+  border:3px solid rgba(255,255,255,0.08);
+  border-top-color:var(--accent);
+  border-radius:50%;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.overlay-text{font-size:14px;color:var(--muted)}
+.retry-btn{
+  padding:8px 20px;background:var(--accent);color:#fff;
+  border:none;border-radius:6px;font-size:13px;cursor:pointer;
+  font-family:'Noto Serif Devanagari',serif;
+}
+
+/* ── Toolbar ── */
+.toolbar{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  height:44px;background:var(--surface);border-top:1px solid var(--border);
+  flex-shrink:0;
+}
+.tbtn{
+  width:34px;height:34px;background:transparent;border:none;border-radius:6px;
+  color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .15s,color .15s;
+}
+.tbtn:hover{background:rgba(255,255,255,0.07);color:var(--text)}
+.tbtn svg{width:17px;height:17px}
+.tdiv{width:1px;height:18px;background:var(--border);margin:0 4px}
+
+/* ── Toast ── */
+.toast{
+  position:fixed;bottom:56px;left:50%;
+  transform:translateX(-50%) translateY(10px);
+  background:#2a2b38;color:var(--text);font-size:13px;
+  padding:8px 18px;border-radius:20px;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+  white-space:nowrap;z-index:999;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── Single page mode (mobile) ── */
+.book.single .page--left{display:none}
+.book.single .spine{display:none}
+.book.single .page--right{border-radius:4px}
+
+@media(max-width:600px){
+  .nav--left{left:4px}
+  .nav--right{right:4px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <button class="tbtn" id="backBtn" aria-label="back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="topbar-title" id="bookTitle">शिक्षित मित्र</div>
+    <div class="topbar-page">
+      <span id="pageCurrent">–</span><span class="topbar-page__sep">/</span><span id="pageTotal">–</span>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+
+    <button class="nav nav--left" id="prevBtn" aria-label="prev">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+
+    <div class="book-wrap" id="bookWrap">
+      <div class="book" id="book">
+        <div class="page page--left" id="pageLeft">
+          <div class="page-inner">
+            <div class="page-head" id="leftHead"></div>
+            <div class="page-title" id="leftTitle"></div>
+            <div class="page-body" id="leftBody"></div>
+            <div class="page-num" id="leftNum"></div>
+          </div>
+        </div>
+        <div class="spine"></div>
+        <div class="page page--right" id="pageRight">
+          <div class="page-inner">
+            <div class="page-head" id="rightHead"></div>
+            <div class="page-title" id="rightTitle"></div>
+            <div class="page-body" id="rightBody"></div>
+            <div class="page-num" id="rightNum"></div>
+          </div>
+        </div>
+
+        <!-- Flip leaf (injected during animation) -->
+        <div class="flip-container" id="flipLeaf" style="display:none">
+          <div class="flip-face flip-face--front" id="flipFront"></div>
+          <div class="flip-face flip-face--back"  id="flipBack"></div>
+        </div>
+      </div>
+
+      <!-- Loading / error overlays -->
+      <div class="overlay" id="overlayLoad">
+        <div class="spinner"></div>
+        <p class="overlay-text">पाना लोड हुँदैछ…</p>
+      </div>
+      <div class="overlay is-hidden" id="overlayErr">
+        <p class="overlay-text" id="errMsg">लोड गर्न सकिएन</p>
+        <button class="retry-btn" id="retryBtn">फेरि प्रयास गर्नुहोस्</button>
+      </div>
+    </div>
+
+    <button class="nav nav--right" id="nextBtn" aria-label="next">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+
+  </main>
+
+  <footer class="toolbar">
+    <button class="tbtn" id="fullBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>
+        <path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+      </svg>
+    </button>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ── Config ── */
+var SHEET_URL =
+  "https://docs.google.com/spreadsheets/d/e/" +
+  "2PACX-1vS5svv38RZ1MJ54P73voMTXWZYuNZZeU6Hy4uWsXS95Z0BcydyeRsQINcY8gzVyKYNCeQoM8u3gs7E_" +
+  "/pub?output=csv";
+
+var params      = new URLSearchParams(window.location.search);
+var BOOK_FILTER = (params.get("book") || "second").toLowerCase().trim();
+var FLIP_MS     = 550;
+
+var state = {
+  title:   params.get("title") || "शिक्षित मित्र",
+  pages:   [],   // [{title,content,pageLabel}]
+  cur:     1,    // 1-based, always the RIGHT page index
+  single:  false,
+  flipping:false
+};
+
+/* ── Refs ── */
+var $ = function(id){ return document.getElementById(id); };
+var el = {
+  bookTitle:$("bookTitle"), pageCurrent:$("pageCurrent"), pageTotal:$("pageTotal"),
+  stage:$("stage"), bookWrap:$("bookWrap"), book:$("book"),
+  pageLeft:$("pageLeft"), pageRight:$("pageRight"),
+  leftHead:$("leftHead"), leftTitle:$("leftTitle"), leftBody:$("leftBody"), leftNum:$("leftNum"),
+  rightHead:$("rightHead"), rightTitle:$("rightTitle"), rightBody:$("rightBody"), rightNum:$("rightNum"),
+  flipLeaf:$("flipLeaf"), flipFront:$("flipFront"), flipBack:$("flipBack"),
+  overlayLoad:$("overlayLoad"), overlayErr:$("overlayErr"), errMsg:$("errMsg"),
+  prevBtn:$("prevBtn"), nextBtn:$("nextBtn"), retryBtn:$("retryBtn"),
+  backBtn:$("backBtn"), fullBtn:$("fullBtn"), toast:$("toast")
+};
+
+/* ── Toast ── */
+var _tt;
+function toast(msg){
+  el.toast.textContent = msg;
+  el.toast.classList.add("show");
+  clearTimeout(_tt);
+  _tt = setTimeout(function(){ el.toast.classList.remove("show"); }, 1800);
+}
+
+/* ── CSV parser ── */
+function parseCSV(text){
+  var rows=[], lines=text.split(/\r?\n/);
+  lines.forEach(function(line){
+    if(!line.trim()) return;
+    var cols=[],cur="",inQ=false;
+    for(var i=0;i<line.length;i++){
+      var ch=line[i];
+      if(inQ){ if(ch==='"'){ if(line[i+1]==='"'){cur+='"';i++;}else inQ=false; } else cur+=ch; }
+      else{ if(ch==='"') inQ=true; else if(ch===','){cols.push(cur.trim());cur="";} else cur+=ch; }
+    }
+    cols.push(cur.trim());
+    rows.push(cols);
+  });
+  return rows;
+}
+
+/* ── Fetch pages from sheet ── */
+function fetchPages(){
+  return fetch(SHEET_URL)
+    .then(function(r){ if(!r.ok) throw new Error(r.status); return r.text(); })
+    .then(function(csv){
+      var rows = parseCSV(csv);
+      if(rows.length < 2) throw new Error("empty");
+      var h    = rows[0].map(function(x){ return x.toLowerCase().trim(); });
+      var cBook    = h.indexOf("book");
+      var cTitle   = h.indexOf("title");
+      var cContent = h.indexOf("content");
+      var cOrder   = h.indexOf("order");
+      if(cBook<0) throw new Error("no book column");
+
+      var out=[];
+      for(var r=1;r<rows.length;r++){
+        var row=rows[r];
+        if(!row[cBook]) continue;
+        if(row[cBook].toLowerCase().trim() !== BOOK_FILTER) continue;
+        out.push({
+          title:   cTitle>=0   ? row[cTitle]||""   : "",
+          content: cContent>=0 ? row[cContent]||"" : "",
+          order:   cOrder>=0   ? parseInt(row[cOrder],10)||9999 : 9999
+        });
+      }
+      out.sort(function(a,b){return a.order-b.order;});
+      // Add page numbers
+      out.forEach(function(p,i){ p.pageNum = i+1; });
+      return out;
+    });
+}
+
+/* ── Layout ── */
+function layout(){
+  var sw = el.stage.clientWidth  - 96;
+  var sh = el.stage.clientHeight - 16;
+  var A4 = 210/297;
+  state.single = sw < 520;
+
+  var ph, pw;
+  if(state.single){
+    ph = Math.min(sh, sw / A4);
+    pw = Math.min(sw, ph * A4);
+    ph = pw / A4;
+  } else {
+    ph = Math.min(sh, (sw/2) / A4);
+    pw = Math.min(sw, ph * A4 * 2);
+    ph = (pw/2) / A4;
+  }
+  pw = Math.floor(state.single ? pw : pw/2);
+  ph = Math.floor(ph);
+
+  el.book.style.setProperty("--pw", pw+"px");
+  el.book.style.setProperty("--ph", ph+"px");
+  el.book.classList.toggle("single", state.single);
+}
+
+/* ── Fill a page element ── */
+function fillPage(headEl, titleEl, bodyEl, numEl, pageData, sectionTitle){
+  if(!pageData){
+    headEl.textContent = "";
+    titleEl.textContent = "";
+    bodyEl.textContent = "";
+    numEl.textContent = "";
+    return;
+  }
+  headEl.textContent  = sectionTitle || state.title;
+  titleEl.textContent = pageData.title || "";
+  bodyEl.textContent  = pageData.content || "";
+  numEl.textContent   = pageData.pageNum;
+}
+
+/* ── Render spread (no animation) ── */
+function renderSpread(rightIdx){
+  state.cur = rightIdx;
+  var leftIdx = rightIdx - 1;
+  var rightPage = state.pages[rightIdx - 1] || null;
+  var leftPage  = (!state.single && leftIdx >= 1) ? state.pages[leftIdx - 1] : null;
+
+  fillPage(el.rightHead, el.rightTitle, el.rightBody, el.rightNum, rightPage, state.title);
+  fillPage(el.leftHead,  el.leftTitle,  el.leftBody,  el.leftNum,  leftPage,  state.title);
+
+  el.pageCurrent.textContent = rightIdx;
+  el.pageTotal.textContent   = TOTAL_PAGES;
+  el.prevBtn.disabled = rightIdx <= 1;
+  el.nextBtn.disabled = rightIdx >= TOTAL_PAGES;
+}
+
+/* ── Clone a page side for flip animation ── */
+function clonePageHTML(pageData, isRight){
+  var div = document.createElement("div");
+  div.className = "page " + (isRight ? "page--right" : "page--left");
+  div.style.cssText = "width:100%;height:100%;position:absolute;inset:0;";
+  var inner = document.createElement("div");
+  inner.className = "page-inner";
+  var h = document.createElement("div"); h.className="page-head"; h.textContent = state.title;
+  var t = document.createElement("div"); t.className="page-title"; t.textContent = pageData ? pageData.title : "";
+  var b = document.createElement("div"); b.className="page-body";  b.textContent = pageData ? pageData.content : "";
+  var n = document.createElement("div"); n.className="page-num";   n.textContent = pageData ? pageData.pageNum : "";
+  inner.appendChild(h); inner.appendChild(t); inner.appendChild(b); inner.appendChild(n);
+  div.appendChild(inner);
+  return div.outerHTML;
+}
+
+/* ── Animate flip ── */
+function animateFlip(toRight, toIdx, done){
+  if(state.flipping) return;
+  state.flipping = true;
+
+  var leaf  = el.flipLeaf;
+  var front = el.flipFront;
+  var back  = el.flipBack;
+
+  // Decide pages for front/back faces
+  var frontPageIdx, backPageIdx;
+  if(toRight){ // going next: leaf comes from right side
+    frontPageIdx = state.cur;       // current right page
+    backPageIdx  = toIdx;           // next page
+    leaf.className = "flip-container is-right";
+  } else {     // going prev: leaf comes from left side
+    frontPageIdx = state.cur - 1;  // current left page
+    backPageIdx  = toIdx - 1;      // prev spread left page
+    leaf.className = "flip-container is-left";
+  }
+
+  front.innerHTML = clonePageHTML(state.pages[frontPageIdx-1]||null, !toRight);
+  back.innerHTML  = clonePageHTML(state.pages[backPageIdx-1]||null,  toRight);
+
+  leaf.style.display = "block";
+  leaf.style.transform = "rotateY(0deg)";
+  leaf.style.transition = "none";
+
+  // Force reflow
+  leaf.getBoundingClientRect();
+
+  var startAngle = 0;
+  var endAngle   = toRight ? -180 : 180;
+  var startTime  = null;
+
+  function ease(t){ return t<.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
+
+  function tick(ts){
+    if(!startTime) startTime = ts;
+    var t = Math.min((ts-startTime)/FLIP_MS, 1);
+    var angle = startAngle + (endAngle - startAngle) * ease(t);
+    leaf.style.transform = "rotateY("+angle+"deg)";
+    if(t < 1){ requestAnimationFrame(tick); }
+    else{
+      leaf.style.display = "none";
+      state.flipping = false;
+      done();
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ── Navigation ── */
+function goNext(){
+  if(state.flipping || state.cur >= TOTAL_PAGES) return;
+  var toIdx = state.cur + 1;
+  animateFlip(true, toIdx, function(){ renderSpread(toIdx); });
+}
+
+function goPrev(){
+  if(state.flipping || state.cur <= 1) return;
+  var toIdx = state.cur - 1;
+  animateFlip(false, toIdx, function(){ renderSpread(toIdx); });
+}
+
+/* ── Swipe ── */
+var _sx=0, _sy=0, _st=0;
+el.stage.addEventListener("touchstart", function(e){
+  var t=e.touches[0]; _sx=t.clientX; _sy=t.clientY; _st=Date.now();
+}, {passive:true});
+el.stage.addEventListener("touchend", function(e){
+  var t=e.changedTouches[0];
+  var dx=t.clientX-_sx, dy=t.clientY-_sy, dt=Date.now()-_st;
+  if(Math.abs(dx)>Math.abs(dy) && Math.abs(dx)>40 && dt<400){
+    if(dx<0) goNext(); else goPrev();
+  }
+}, {passive:true});
+
+/* ── Keyboard ── */
+document.addEventListener("keydown", function(e){
+  if(e.key==="ArrowRight"||e.key==="ArrowDown") goNext();
+  if(e.key==="ArrowLeft" ||e.key==="ArrowUp")   goPrev();
+});
+
+/* ── Back ── */
+el.backBtn.addEventListener("click", function(){
+  if(window.history.length>1) window.history.back();
+  else window.location.href="index.html";
+});
+
+/* ── Fullscreen ── */
+el.fullBtn.addEventListener("click", function(){
+  var isFull = document.fullscreenElement || document.webkitFullscreenElement;
+  if(!isFull){
+    var req = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen;
+    if(req) req.call(document.documentElement);
+  } else {
+    (document.exitFullscreen||document.webkitExitFullscreen).call(document);
+  }
+});
+
+/* ── Nav buttons ── */
+el.prevBtn.addEventListener("click", goPrev);
+el.nextBtn.addEventListener("click", goNext);
+el.retryBtn.addEventListener("click", load);
+
+/* ── Resize ── */
+var _rt;
+window.addEventListener("resize", function(){
+  clearTimeout(_rt);
+  _rt = setTimeout(function(){ layout(); renderSpread(state.cur); }, 200);
+});
+
+/* ── Overlays ── */
+function showLoad(){ el.overlayLoad.classList.remove("is-hidden"); el.overlayErr.classList.add("is-hidden"); }
+function showErr(msg){ el.overlayLoad.classList.add("is-hidden"); el.overlayErr.classList.remove("is-hidden"); el.errMsg.textContent=msg||"लोड गर्न सकिएन"; }
+function hideOverlays(){ el.overlayLoad.classList.add("is-hidden"); el.overlayErr.classList.add("is-hidden"); }
+
+/* ── Load ── */
+var TOTAL_PAGES = 10;
+
+function load(){
+  showLoad();
+  state.pages = [];
+  state.cur   = 1;
+  el.bookTitle.textContent = state.title;
+
+  fetchPages().then(function(sheetPages){
+    // Build a map of order → page data from sheet
+    var dataMap = {};
+    sheetPages.forEach(function(p){
+      if(p.order >= 1 && p.order <= TOTAL_PAGES) dataMap[p.order] = p;
+    });
+
+    // Always create exactly TOTAL_PAGES pages; fill blanks where no sheet data
+    var pages = [];
+    for(var i = 1; i <= TOTAL_PAGES; i++){
+      if(dataMap[i]){
+        pages.push(dataMap[i]);
+      } else {
+        pages.push({ title: "", content: "", order: i, pageNum: i });
+      }
+    }
+    // Ensure pageNum is set correctly
+    pages.forEach(function(p, idx){ p.pageNum = idx + 1; });
+
+    state.pages = pages;
+    layout();
+    hideOverlays();
+    renderSpread(1);
+  }).catch(function(err){
+    console.error(err);
+    // Even on error, show blank 10-page book
+    var pages = [];
+    for(var i = 1; i <= TOTAL_PAGES; i++){
+      pages.push({ title: "", content: "", order: i, pageNum: i });
+    }
+    state.pages = pages;
+    layout();
+    hideOverlays();
+    renderSpread(1);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", load);
+})();
+</script>
+</body>
+</html>
